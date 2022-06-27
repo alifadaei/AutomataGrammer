@@ -1,3 +1,6 @@
+from tracemalloc import start
+
+
 class Grammer:
     def __init__(self, rules) -> None:
         self.rules = rules
@@ -63,24 +66,33 @@ class FiniteMachine:
         self.characters = characters
 
     def printMachine(self):
-        print("Starting state: ", 'S')
-        print('states: ', self.states)
+        print("Starting state(q0): ", 'S')
+        print('states(Q): ', self.states)
         printTransitions = []
         for trans in self.transitions:
             suitableTrans = f'δ({trans[0]}, {trans[1]}) => {trans[2]}'
             printTransitions.append(suitableTrans)
-        print('transitions: ', printTransitions)
+        print('transitions(T): ', printTransitions)
+        print('AllowedCharacters(Σ): ', self.characters)
         print('FinalState: ', 'F')
-        print('AllowedCharacters: ', self.characters)
 
     def accepts(self, string, startIndex, initialState):
-        print(self.transitions)
+        if(initialState == 'F'):
+            return True
         possibleTransitions = list(
             filter(lambda trans: trans[0] == initialState, self.transitions))
-        print(possibleTransitions)
+        for trans in possibleTransitions:
+            # if the transition fits in current state and couuld be applied
+            word = trans[1]  # the transition string
+            nextIndex = startIndex + len(word)
+            if string[startIndex:nextIndex] == word:
+                if self.accepts(string, nextIndex, trans[2]):
+                    return True
+        return False
 
 
 f = FormalGrammer(
     [('B', 'aB'), ('S', 'aB'), ('B', 'b')])
 machine = f.getMachine()
-machine.accepts(None, None, 'B')
+machine.printMachine()
+print(machine.accepts('assab', 0, 'S'))
