@@ -1,6 +1,3 @@
-from tracemalloc import start
-
-
 class Grammer:
     def __init__(self, rules) -> None:
         self.rules = rules
@@ -91,8 +88,48 @@ class FiniteMachine:
         return False
 
 
-f = FormalGrammer(
-    [('B', 'aB'), ('S', 'aB'), ('B', 'b')])
-machine = f.getMachine()
-machine.printMachine()
-print(machine.accepts('assab', 0, 'S'))
+class ContextFreeGrammer(Grammer):
+    def __init__(self, rules) -> None:
+        super().__init__(rules)
+        self.isContextFree = self.checkContextFree()
+
+    def checkContextFree(self):
+        for rule in self.rules:
+            if len(rule[0]) != 1:
+                return False
+        return True
+
+    def makeGreibach(self):
+        newRules = []
+        for rule, index in self.rules:
+            string = rule[1]
+            newRules.extend(self.stringToGreibachRules(
+                string, 0, index, rule[0]))
+
+    def stringToGreibachRules(self, string, startIndex, namingConventionIndex, variable):
+        if startIndex == len(string):
+            return []
+        firstChar = string[startIndex]
+        newVariable = f'R{namingConventionIndex}R{startIndex}'
+        if firstChar.islower():
+            return [(variable, newVariable)].extend(self.stringToGreibachRules(string, startIndex+1, namingConventionIndex, variable))
+
+    def makeChomsky(self):
+        # step 1 eliminate start rule
+
+        # step 2 eliminate null, unit and useless productions.
+        # step 3 eliminate rules which a Terminal exists with other Terminals or Vaiables
+        # step 4 eliminate productions with more than two vaiables
+
+
+RULES = [('B', 'aBaabahd'), ('A', 'aBasdBA'), ('B', 'b')]
+STRING = 'aaaaab'
+
+# f = FormalGrammer(RULES)
+# # print(f.isFormal)
+# machine = f.getMachine()×
+# # machine.printMachine()
+# print(machine.accepts(STRING, 0, 'S'))
+
+c = ContextFreeGrammer(RULES)
+print(c.isContextFree)
